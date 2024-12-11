@@ -6,6 +6,7 @@ import { publicClient, walletClient } from '../config/viemConfig'
 import { mammothContract } from '../config/contracts'
 import { parseAbiItem } from 'viem'
 import { ToastMessage } from '../components/ToastMessage';
+import { type Log } from 'viem'
 
 // Centralized error messages for consistent error handling
 export const ERROR_MESSAGES = {
@@ -162,6 +163,13 @@ export const sendGMammoth = async (toAddress: string) => {
     return hash;
 };
 
+type GMammothEvent = {
+  args: {
+    from: string;
+    to: string;
+  };
+};
+
 /**
  * Sets up an event listener for incoming gMammoth messages
  * @param userAddress The address to listen for messages to
@@ -180,8 +188,7 @@ export const setupGMammothEventListener = (userAddress: string) => {
         console.log('Received logs:', logs);
         try {
           for (const log of logs) {
-            // Type assertion for event args
-            const { from, to } = log.args as unknown as { from: string; to: string };
+            const { from, to } = (log as unknown as GMammothEvent).args;
             console.log('Log args:', { from, to });
             if (to?.toLowerCase() === userAddress.toLowerCase()) {
               handleIncomingMessage(from);
