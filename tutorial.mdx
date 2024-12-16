@@ -1,0 +1,152 @@
+# Building gMammoth: A Real-Time Messaging dApp on Astria
+
+## Overview
+gMammoth is a minimalist messaging dApp deployed on Astria Flame testnet. It demonstrates:
+- Smart contract deployment on Astria
+- Real-time messaging using EVM events
+- Frontend integration with custom EVM chains
+
+## Prerequisites
+- Node.js v18+
+- Foundry
+- Git
+- MetaMask or another Web3 wallet
+
+## Project Structure
+```
+gmammoth/
+├── foundry-contracts/    # Smart contracts and deployment scripts
+└── nextjs-ui/           # Frontend application
+```
+
+## Smart Contract Implementation
+
+### Core Contract
+```solidity:foundry-contracts/src/GMammoth.sol
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.28;
+
+contract GMammoth {
+    mapping(address => bool) public registeredUsers;
+    address[] public userList;
+
+    event UserRegistered(address indexed user);
+    event UserDeregistered(address indexed user);
+    event GMammothSent(
+        address indexed from,
+        address indexed to,
+        uint256 timestamp
+    );
+
+    function register() public {
+        require(!registeredUsers[msg.sender], "User already registered");
+        registeredUsers[msg.sender] = true;
+        userList.push(msg.sender);
+        emit UserRegistered(msg.sender);
+    }
+
+    // Additional functions...
+}
+```
+
+The contract maintains a registry of users and emits events for:
+- User registration/deregistration
+- Message sending
+- Active user queries
+
+### Deployment Configuration
+```solidity:foundry-contracts/script/GMammoth.s.sol
+contract GMammothScript is Script {
+    GMammoth public gMammoth;
+    
+    uint256 public constant CHAIN_ID = 16604737732183;
+    string public constant RPC_URL = "https://rpc.flame.dawn-1.astria.org";
+
+    function setUp() public {
+        require(block.chainid == CHAIN_ID, "Wrong chain ID");
+    }
+
+    function run() public {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey);
+        gMammoth = new GMammoth();
+        vm.stopBroadcast();
+    }
+}
+```
+
+## Frontend Implementation
+
+### Chain Configuration
+```typescript:nextjs-ui/app/config/chainConfig.ts
+export const astriaFlame = {
+    id: 16604737732183,
+    name: 'dawn-1',
+    nativeCurrency: {
+        decimals: 18,
+        name: 'TIA',
+        symbol: 'TIA',
+    },
+    rpcUrls: {
+        default: {
+            http: ['https://rpc.flame.dawn-1.astria.org'],
+            webSocket: ['wss://rpc.flame.dawn-1.astria.org/ws'],
+        },
+        public: {
+            http: ['https://rpc.flame.dawn-1.astria.org'],
+            webSocket: ['wss://rpc.flame.dawn-1.astria.org/ws'],
+        },
+    },
+    blockExplorers: {
+        default: {
+            name: 'Explorer',
+            url: 'https://explorer.flame.dawn-1.astria.org',
+        },
+    },
+} as const satisfies Chain
+```
+
+### Contract Interactions
+```typescript:nextjs-ui/app/utils/contractInteractions.ts
+export const setupGMammothEventListener = (userAddress: string) => {
+    console.log('Setting up GMammoth event listener for', userAddress);
+    
+    try {
+        const unwatch = publicClient.watchContractEvent({
+            address: mammothContract.address,
+            abi: mammothContract.abi,
+            eventName: 'GMammothSent',
+            onLogs: (logs) => {
+                for (const log of logs) {
+                    const { from, to } = (log as unknown as GMammothEvent).args;
+                    if (to?.toLowerCase() === userAddress.toLowerCase()) {
+                        handleIncomingMessage(from);
+                    }
+                }
+            },
+        });
+
+        return unwatch;
+    } catch (error) {
+        console.error('Error setting up event listener:', error);
+        return () => {};
+    }
+};
+```
+
+## Deployment
+
+### Smart Contract Deployment
+1. Set environment variables:
+```bash
+export PRIVATE_KEY=your_private_key
+export ASTRIA_RPC_URL=https://rpc.flame.dawn-1.astria.org
+```
+
+2. Deploy the contract:
+```bash
+forge script script/GMammoth.s.sol \
+    --rpc-url $ASTRIA_RPC_URL \
+    --private-key $PRIVATE_KEY \
+    --broadcast
+``` 

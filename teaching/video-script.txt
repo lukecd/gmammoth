@@ -1,0 +1,114 @@
+# gMammoth Video Script
+
+## Intro
+gMammoth, I'm Luke a Developer Advocate at Celestia Labs, and this is a video about gMammoth - a minimalist messaging dApp inspired by the viral 'Yo' app from 2014. 
+
+Our videos have subtitles in multiple languages, make sure to click below to supported languages. And if your language is not supported, please let us knows in the comments. Also, make sure to subscribe to our channel and give this video a thumbs up if you enjoyed it.
+
+We built gMammoth for the Mammothathon, the 2025 Celestia hackathon. It's a demo project you can learn from and also use as a starting point for your own projects.
+
+Yo was one of those weird apps that nobody quite knew why it was famous. It was a messaging app where you could only send one message: "Yo". Nothing custom, nothing else. It was launched on April Fool's day, and while many thought it was a joke, the app went viral, received a $1M investment, and was later valued at $10M. 
+
+Proving, sometimes the simplest ideas are the most compelling.
+
+gMammoth is a demo project showing how to build real-time messaging apps on modular blockchains.
+
+This project is built using Astria Flame testnet, which provides fast finality and EVM compatibility while using Celestia for data availability.
+
+For developers joining the Mammothathon, gMammoth demonstrates two key concepts:
+- How to deploy EVM smart contracts in a rollup built on Celestia.
+- How to use EVM events for real-time messaging
+
+## Events Deep Dive
+
+First up, what is an event? In EVM chains, events are a way for smart contracts to emit data that can be  observed by external clients. You can think of them like push notications ... it's not really the same thing, but it's a decent mental model you can use to understand.
+
+Events have two key characteristics that make them perfect for messaging apps:
+1. They're cheaper than storing data in contract storage
+2. They're a broadcast mechanism - clients can subscribe to events and receive notifications in real-time
+
+In our contract, we use three events:
+
+```solidity
+event UserRegistered(address indexed user);
+event UserDeregistered(address indexed user);
+event GMammothSent(address indexed from, address indexed to, uint256 timestamp);
+```
+
+In our frontend, we use viem's watchContractEvent to subscribe to these events. When a user sends a gMammoth, our smart contract emits an event, and any listening clients can pick it up and display a notification.
+
+```ts
+const { data, isLoading, error } = useWatchContractEvent({
+  address: contractAddress,
+  abi: contractAbi,
+  eventName: 'GMammothSent',
+  args: [address, address, timestamp],
+});
+```
+
+But here's something important to understand: clients need to be actively listening to receive events in real-time. If your app goes offline, you'll need to fetch any missed events when you reconnect.
+
+For our gMammoth app, this limitation is actually fine - missing messages while offline isn't a big deal. But, depending on your usecase, you may a way to access historical events, either by indexing them in a database or another custom solution.
+
+## Code Walkthrough
+
+Let's dive into the code. If you clone the repo from [LINK], you'll see two sub-directories:
+
+- foundry-contracts: Our Solidity smart contracts
+- nextjs-ui: Our frontend application
+
+### Smart Contract Overview
+
+Let's look at GMammoth.sol first. The contract is straightforward:
+
+[Show GMammoth.sol and highlight key functions]
+- register(): Adds users to the messaging system
+- deregister(): Removes users to the messaging system
+- sendGMammoth(): Emits an event for messaging
+
+The deployment process is handled by our GMammoth.s.sol script. Take a look:
+
+[Show GMammoth.s.sol]
+
+- It verifies we're on the correct chain ID for Astria Flame
+- Sets up the RPC URL
+- Handles the deployment transaction
+
+I've structured this script to be easily reusable. Just fork the repo, swap in your contract, and follow the deployment commands in the README. This saves you time figuring out chain IDs, RPC URLs, and the verification process for Astria.
+
+### Frontend Architecture
+
+Let me show you how the app works.
+
+[DEMO PLACEHOLDER: Show quick demo of sending a gMammoth message and receiving the notification]
+
+The frontend is built with:
+- Next.js
+- TypeScript
+- Tailwind
+- RainbowKit / wagmi for wallet connections
+- viem for contract interactions
+
+We're not going to get lost in the Next.js and Tailwind implementation details, for that look at the written tutorial for more details. Instead, let's focus on two key aspects of building on Astria:
+
+First, configuring RainbowKit which we use for wallet connections. Since Astria Flame is a custom chain, we need to tell RainbowKit about it:
+
+[Show chainConfig.ts]
+- We define the chain ID
+- Set up the RPC endpoints
+- Configure the native currency (TIA)
+- Add the block explorer URL
+
+Second, and more importantly, let's look at how we interact with our contract:
+[Show contractInteractions.ts]
+- How we set up event listeners using viem's watchContractEvent
+- How we handle incoming messages
+- How we manage the connection to the Astria network
+
+The real magic happens in the event handling - when someone sends a gMammoth, our frontend picks up the event and displays a notification in real-time.
+
+
+## Wrap Up
+This video gives you an overview of gMammoth's architecture. For a detailed code breakdown, check out our written tutorial at [LINK].
+
+That's all for now, peace out!

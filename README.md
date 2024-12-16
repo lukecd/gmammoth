@@ -10,7 +10,7 @@
 
 gMammoth is a demo project for [redacted]. 
 
-It's a minimalist messaging dApp inspired by "Yo", built on top of Celestia's data availability layer and deployed to the Astria Flame testnet.
+It's a minimalist messaging dApp inspired by the straangly viral app ["Yo"](https://en.wikipedia.org/wiki/Yo_(app)) from 2014. gMammoth is built on top of Celestia's data availability layer and deployed to the Astria Flame testnet.
 
 Just as Mammoths once traversed the tundra greeting each other with their mighty calls, Web3 users can now connect and share simple acknowledgments through the power of modular blockchains.
 
