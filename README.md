@@ -8,11 +8,14 @@
 
 ## About
 
-gMammoth is a demo project for [redacted]. 
+gMammoth is a demo project the [Celestia Mammothon hackathon](https://mammothon.celestia.org/). 
 
-It's a minimalist messaging dApp inspired by the straangly viral app ["Yo"](https://en.wikipedia.org/wiki/Yo_(app)) from 2014. gMammoth is built on top of Celestia's data availability layer and deployed to the Astria Flame testnet.
+It's a minimalist messaging dApp inspired by the strangly viral app ["Yo"](https://en.wikipedia.org/wiki/Yo_(app)) from 2014. gMammoth is built on top of Celestia's data availability layer and deployed to the Astria Flame testnet.
 
 Just as Mammoths once traversed the tundra greeting each other with their mighty calls, Web3 users can now connect and share simple acknowledgments through the power of modular blockchains.
+
+## Tutorial
+Check out out [written](/teaching/tutorial.md) and [video](https://youtu.be/vDdlmxxhld8) tutorials. 
 
 ## Stack
 
@@ -20,7 +23,7 @@ Just as Mammoths once traversed the tundra greeting each other with their mighty
 Celestia is a modular blockchain network. It separates the consensus and data availability aspects of blockchain architecture from execution, allowing for more scalable and flexible blockchain deployments. By handling data availability as a specialized service, Celestia enables the creation of sovereign rollups and modular blockchain applications with improved scalability.
 
 ### Astria Flame Testnet
-Astria Flame is a high-performance testnet that useds Celestia's data availability layer. It implements a unique "shared sequencer" architecture that:
+Astria Flame is a high-performance testnet that useds Celestia's data availability layer. It implements a unique shared sequencer architecture that:
 - Provides fast transaction finality
 - Ensures fair transaction ordering
 - Enables seamless cross-chain communication

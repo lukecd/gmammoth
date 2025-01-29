@@ -11,7 +11,7 @@ contract GMammothScript is Script {
     uint256 public constant CHAIN_ID = 16604737732183;
     string public constant RPC_URL = "https://rpc.flame.dawn-1.astria.org";
 
-    function setUp() public {
+    function setUp() public view {
         // Verify we're on the correct network
         require(block.chainid == CHAIN_ID, "Wrong chain ID. Please deploy to Flame testnet.");
     }
